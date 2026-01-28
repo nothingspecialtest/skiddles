@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Android SDK Installation Script
+
+echo "Installing Android SDK..."
+
+# Update package manager
+sudo apt update
+
+# Install Java (required for Android SDK)
+echo "Installing Java Development Kit..."
+sudo apt install -y default-jdk
+
+# Install Android SDK dependencies
+echo "Installing Android SDK dependencies..."
+sudo apt install -y \
+    lib32z1 \
+    lib32stdc++6 \
+    libxrender1 \
+    libxext6
+
+# Create Android SDK directory
+echo "Creating Android SDK directory..."
+mkdir -p ~/Android/sdk
+cd ~/Android/sdk
+
+# Download Android SDK Command Line Tools
+echo "Downloading Android SDK Command Line Tools..."
+wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+
+# Extract the tools
+echo "Extracting Android SDK tools..."
+unzip -q commandlinetools-linux-9477386_latest.zip
+rm commandlinetools-linux-9477386_latest.zip
+
+# Create tools directory structure
+mkdir -p cmdline-tools/latest
+mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+
+# Set environment variables
+echo "Setting up environment variables..."
+export ANDROID_HOME=~/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/build-tools
+
+# Add to bashrc for persistent setup
+cat >> ~/.bashrc << 'EOF'
+
+# Android SDK Environment Variables
+export ANDROID_HOME=~/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/build-tools
+EOF
+
+echo "Accepting Android SDK licenses..."
+# Accept all licenses
+yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+# Install commonly used components
+echo "Installing Android SDK components..."
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
+
+echo "Android SDK installation completed!"
+echo "ANDROID_HOME is set to: ~/Android/sdk"
+echo "Please run: source ~/.bashrc"
+echo "To verify installation, run: sdkmanager --list"
